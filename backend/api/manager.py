@@ -324,6 +324,14 @@ class InterviewManager:
                 return False, "The uploaded file does not appear to be a Resume/CV. Please upload a valid professional resume."
 
             self._extract_entities(text)
+            
+            # --- NAME EXTRACTION ---
+            # Try to extract candidate name from the resume text if not already set or mismatch
+            extracted_name = self._extract_name_from_text(text)
+            if extracted_name:
+                print(f" 👤 [RESUME] Identified Candidate: {extracted_name}")
+                self.candidate_name = extracted_name
+                
             return True, "Resume loaded successfully"
         except Exception as e:
             print(f"Error loading resume: {e}")
@@ -355,6 +363,25 @@ class InterviewManager:
             return "YES" in res
         except:
             return match_count >= 1
+
+    def _extract_name_from_text(self, text):
+        """Uses AI to find the candidate's name in the resume header."""
+        if not self.client: return None
+        try:
+            # We look at the first 500 chars where the name is usually found
+            snippet = text[:500]
+            prompt = f"Identify the full name of the candidate from this resume snippet. Return ONLY the name. If no clear name is found, return 'Unknown'. Snippet:\n{snippet}"
+            response = self.client.chat.completions.create(
+                model=self.model_name,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.0,
+                max_tokens=20
+            )
+            name = response.choices[0].message.content.strip()
+            if "Unknown" in name or len(name) > 50: return None
+            return name
+        except:
+            return None
 
     def _extract_entities(self, text):
         """Parses resume text for skills, tools, projects, and subjects (used for resume-grounded questions)."""

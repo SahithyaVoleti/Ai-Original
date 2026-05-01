@@ -1158,10 +1158,11 @@ def upload_resume():
     if user_id and str(user_id).isdigit():
         user_data = database.get_user_by_id(int(user_id))
         if user_data:
-            # Overwrite candidate_name with the profile name from the database for strict identity matching
-            candidate_name = user_data.get('name', candidate_name)
+            # We record the profile name, but we don't force it yet
+            # This allows the manager.load_resume to find the REAL name on the PDF
+            profile_name = user_data.get('name', 'Candidate')
             candidate_email = user_data.get('email', candidate_email)
-            print(f"  [IDENTITY] Matching resume against Profile: {candidate_name}")
+            print(f"  [IDENTITY] Profile name is: {profile_name}. Checking resume for candidate identity...")
 
         if not is_practice and not database.has_interview_credits(user_id):
             return jsonify({
@@ -1238,15 +1239,18 @@ def upload_resume():
          return jsonify({"status": "error", "message": msg}), 400
 
     # --- IDENTITY VERIFICATION ---
-    # We enforce identity alignment strictly.
-    match, detected_name = manager.verify_candidate_match(candidate_name, manager.resume_text)
+    # Use the name found on the resume for the interview session
+    # If a profile name was found earlier, use it for matching
+    ref_name = profile_name if 'profile_name' in locals() else candidate_name
+    match, detected_name = manager.verify_candidate_match(ref_name, manager.resume_text)
     
+    # Update manager with the best name found
+    manager.candidate_name = detected_name or ref_name
+    print(f" [SESSION] Candidate Name set to: {manager.candidate_name}")
+
     if not match:
          print(f" [RESUME] Identity error: Resume='{detected_name}' vs Input='{candidate_name}'")
          return jsonify({"status": "error", "message": f"Identity Check: The name on the resume ('{detected_name}') does not match your registered name. Upload rejected."})
-
-    # Use the name found on the resume for the interview session
-    manager.candidate_name = detected_name
 
     # Run resume analysis in background to avoid blocking UI during upload/parsing
     import threading
