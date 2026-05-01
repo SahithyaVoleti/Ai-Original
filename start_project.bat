@@ -1,13 +1,14 @@
 @echo off
-echo ==========================================
-echo   AI Interviewer - Unified Starter
-echo ==========================================
+echo Starting AI Interviewer Platform...
 
-start cmd /k "echo Starting Backend... && cd /d %~dp0backend && ..\.venv\Scripts\activate.bat && python api.py"
-start cmd /k "echo Starting Frontend... && cd /d %~dp0frontend && npm run dev"
+:: Start Backend API
+start cmd /k "cd backend/api && ..\..\.venv\Scripts\activate && python api.py"
 
-echo Project is starting in separate windows.
-echo Backend: http://127.0.0.1:5000
-echo Frontend: http://127.0.0.1:3000
-echo ==========================================
+:: Start Backend Worker
+start cmd /k "cd backend/worker && ..\..\.venv\Scripts\activate && python run_proctor_server.py"
+
+:: Start Frontend
+start cmd /k "cd frontend && npm run dev"
+
+echo All services are starting in separate windows.
 pause
