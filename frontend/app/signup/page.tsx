@@ -158,8 +158,15 @@ export default function Signup() {
     };
 
     // --- TTS Logic (Masculine Identity) ---
+    const lastSpokenTextRef = useRef<string>('');
+
     const speak = (text: string) => {
-        if (typeof window === 'undefined') return;
+        if (typeof window === 'undefined' || !text) return;
+
+        // --- VOICE GUARD: Prevent identical double-triggers ---
+        if (lastSpokenTextRef.current === text) return;
+        lastSpokenTextRef.current = text;
+        setTimeout(() => { lastSpokenTextRef.current = ''; }, 2000); 
 
         // 1. Generate new unique ID for this speech request
         const myId = ++globalSpeechTokenRef.current;

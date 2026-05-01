@@ -17,13 +17,20 @@ export default function Login() {
     const [isSpeaking, setIsSpeaking] = useState(false);
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const globalSpeechTokenRef = useRef(0);
+    const lastSpokenTextRef = useRef<string>('');
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
     const speak = (text: string) => {
-        if (typeof window === 'undefined') return;
+        if (typeof window === 'undefined' || !text) return;
+
+        // --- VOICE GUARD: Prevent identical double-triggers ---
+        if (lastSpokenTextRef.current === text) return;
+        lastSpokenTextRef.current = text;
+        setTimeout(() => { lastSpokenTextRef.current = ''; }, 2000); 
+
         const myId = ++globalSpeechTokenRef.current;
         if (audioRef.current) {
             try {
@@ -83,10 +90,13 @@ export default function Login() {
         }
     }, [user, router]);
 
+    const hasGreetedRef = useRef(false);
+
     useEffect(() => {
         // Voice welcome on first meaningful interaction or slight delay
         const timer = setTimeout(() => {
-            if (!user) {
+            if (!user && !hasGreetedRef.current) {
+                hasGreetedRef.current = true;
                 speak("Welcome back. Please provide your credentials to access the evaluation portal.");
             }
         }, 1500);

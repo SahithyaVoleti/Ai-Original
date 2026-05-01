@@ -86,4 +86,4 @@ def apply_cors(app) -> None:
         log.warning(
             "CORS_ORIGINS is not set in production; cross-origin browser requests to this API will be blocked."
         )
-    CORS(app, origins=origins)
+    CORS(app, origins=origins, supports_credentials=True, allow_headers=["Content-Type", "Authorization", "X-Session-ID", "X-Requested-With"])

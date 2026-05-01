@@ -21,6 +21,7 @@ function InnerInstructions() {
     const [isSpeaking, setIsSpeaking] = useState(false);
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const globalSpeechTokenRef = useRef(0);
+    const hasGreetedRef = useRef(false);
     
     // CAPTURE TOPIC FROM URL
     const searchParams = useSearchParams();
@@ -112,8 +113,12 @@ function InnerInstructions() {
 
         // Welcome Orientation
         const welcomeText = `Welcome to the ${topic || 'Core'} Assessment. I am Atlas. Please review the hardware and proctoring protocols carefully before initiating the session. Good luck.`;
-        const timer = setTimeout(() => speak(welcomeText), 1000);
-        return () => clearTimeout(timer);
+        
+        if (!hasGreetedRef.current) {
+            hasGreetedRef.current = true;
+            const timer = setTimeout(() => speak(welcomeText), 1000);
+            return () => clearTimeout(timer);
+        }
     }, [user?.id, topic]);
 
     const sections = [
