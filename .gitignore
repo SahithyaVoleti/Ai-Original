@@ -168,18 +168,20 @@ Thumbs.db
 latest_otp.txt
 debug_error.log
 
-# Backend API Data
-backend_api/evidence/
-backend_api/resumes/
-backend_api/reports/
-backend_api/ai_interviewer.db
-backend_api/.env
+# Backend Data
+backend/api/evidence/
+backend/api/resumes/
+backend/api/reports/
+backend/api/ai_interviewer.db
+backend/api/.env
 
-# Backend Worker Data
-backend_worker/evidence/
-backend_worker/resumes/
-backend_worker/reports/
-backend_worker/.env
+backend/worker/evidence/
+backend/worker/resumes/
+backend/worker/reports/
+backend/worker/.env
+
+backend/archive_monolith/
+
 
 
 # Frontend
